@@ -8,7 +8,7 @@ class Fixi::Command::Commit
   end
 
   def self.arghelp
-    "[<dir>|<file>]"
+    "[<dir>|<file>] ..."
   end
 
   def self.details
@@ -27,37 +27,43 @@ class Fixi::Command::Commit
       opt :verbose, "For modified files, show which attribute changed.
         By default, only the path is shown.".pack
     end
-    path = File.expand_path(args[0] || ".")
-    index = Fixi::Index.new(path)
 
-    index.each(args[0]) do |hash|
-      relpath = hash['relpath']
-      abspath = index.rootpath + '/' + relpath
-      if index.file_in_scope(relpath) && File.exists?(abspath)
-        size = File.size(abspath)
-        mtime = File.mtime(abspath).to_i
-        if size != hash['size']
-          detail = opts[:verbose] ? "size=#{size} " : ""
-          puts "M #{detail}#{opts[:absolute] ? abspath : relpath}"
-          index.update(relpath) unless opts[:dry_run]
-        elsif mtime != hash['mtime']
-          detail = opts[:verbose] ? "mtime=#{Time.at(mtime).utc.iso8601} " : ""
-          puts "M #{detail}#{opts[:absolute] ? abspath : relpath}"
-          index.update(relpath) unless opts[:dry_run]
-        elsif not opts[:shallow]
-          hexdigests = Fixi::hexdigests(Fixi::digests(index.algorithms), abspath)
-          i = 0
-          need_update = false
-          index.algorithms.split(',').each do |algorithm|
-            if not(need_update) && (hexdigests[i] != hash[algorithm])
-              need_update = true
-              detail = opts[:verbose] ? "#{algorithm}=#{hexdigests[i]} " : ""
-              puts "M #{detail}#{opts[:absolute] ? abspath : relpath}"
+    # default to current directory, if no paths specified
+    paths = args.empty? ? '.' : args
+
+    paths.each do |path|
+      path = File.expand_path(path)
+      index = Fixi::Index.new(path)
+
+      index.each(path) do |hash|
+        relpath = hash['relpath']
+        abspath = index.rootpath + '/' + relpath
+        if index.file_in_scope(relpath) && File.exists?(abspath)
+          size = File.size(abspath)
+          mtime = File.mtime(abspath).to_i
+          if size != hash['size']
+            detail = opts[:verbose] ? "size=#{size} " : ""
+            puts "M #{detail}#{opts[:absolute] ? abspath : relpath}"
+            index.update(relpath) unless opts[:dry_run]
+          elsif mtime != hash['mtime']
+            detail = opts[:verbose] ? "mtime=#{Time.at(mtime).utc.iso8601} " : ""
+            puts "M #{detail}#{opts[:absolute] ? abspath : relpath}"
+            index.update(relpath) unless opts[:dry_run]
+          elsif not opts[:shallow]
+            hexdigests = Fixi::hexdigests(Fixi::digests(index.algorithms), abspath)
+            i = 0
+            need_update = false
+            index.algorithms.split(',').each do |algorithm|
+              if not(need_update) && (hexdigests[i] != hash[algorithm])
+                need_update = true
+                detail = opts[:verbose] ? "#{algorithm}=#{hexdigests[i]} " : ""
+                puts "M #{detail}#{opts[:absolute] ? abspath : relpath}"
+              end
+              hash[algorithm] = hexdigests[i]
+              i += 1
             end
-            hash[algorithm] = hexdigests[i]
-            i += 1
+            index.update(relpath, hash) if need_update && not(opts[:dry_run])
           end
-          index.update(relpath, hash) if need_update && not(opts[:dry_run])
         end
       end
     end

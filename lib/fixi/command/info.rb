@@ -7,7 +7,7 @@ class Fixi::Command::Info
   end
 
   def self.arghelp
-    "[<dir>]"
+    "<dir> ..."
   end
 
   def self.details
@@ -18,6 +18,13 @@ class Fixi::Command::Info
     opts = Trollop::options args do
       banner Fixi::Command::banner "info"
     end
-    Fixi::Index.new(args[0]).describe
+
+    # default to current directory, if no paths specified
+    paths = args.empty? ? '.' : args
+
+    paths.each do |path|
+      path = File.expand_path(path)
+      Fixi::Index.new(path).describe
+    end
   end
 end

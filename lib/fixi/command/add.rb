@@ -7,7 +7,7 @@ class Fixi::Command::Add
   end
 
   def self.arghelp
-    "[<dir>|<file>]"
+    "[<dir>|<file>] ..."
   end
 
   def self.details
@@ -21,14 +21,20 @@ class Fixi::Command::Add
         relative to the index root.".pack
       opt :dry_run, "Don't do anything; just report what would be done"
     end
-    path = File.expand_path(args[0] || ".")
-    index = Fixi::Index.new(path)
 
-    index.find(path) do |abspath|
-      relpath = index.relpath(abspath)
-      unless index.contains?(relpath)
-        puts "A #{opts[:absolute] ? abspath : relpath}"
-        index.add(relpath) unless opts[:dry_run]
+    # default to current directory, if no paths specified
+    paths = args.empty? ? '.' : args
+
+    paths.each do |path|
+      path = File.expand_path(path)
+      index = Fixi::Index.new(path)
+
+      index.find(path) do |abspath|
+        relpath = index.relpath(abspath)
+        unless index.contains?(relpath)
+          puts "A #{opts[:absolute] ? abspath : relpath}"
+          index.add(relpath) unless opts[:dry_run]
+        end
       end
     end
 

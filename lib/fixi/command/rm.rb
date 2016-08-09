@@ -8,7 +8,7 @@ class Fixi::Command::Rm
   end
 
   def self.arghelp
-    "[<dir>|<file>]"
+    "[<dir>|<file>] ..."
   end
 
   def self.details
@@ -22,22 +22,27 @@ class Fixi::Command::Rm
         relative to the index root.".pack
       opt :dry_run, "Don't do anything; just report what would be done"
     end
-    path = File.expand_path(args[0] || ".")
-    index = Fixi::Index.new(path)
 
-    index.each(args[0]) do |hash|
-      relpath = hash['relpath']
-      abspath = index.rootpath + '/' + relpath
-      if index.file_in_scope(relpath)
-        unless File.exists?(abspath)
-          puts "D #{opts[:absolute] ? abspath : relpath}"
+    # default to current directory, if no paths specified
+    paths = args.empty? ? '.' : args
+
+    paths.each do |path|
+      path = File.expand_path(path)
+      index = Fixi::Index.new(path)
+
+      index.each(path) do |hash|
+        relpath = hash['relpath']
+        abspath = index.rootpath + '/' + relpath
+        if index.file_in_scope(relpath)
+          unless File.exists?(abspath)
+            puts "D #{opts[:absolute] ? abspath : relpath}"
+            index.delete relpath unless opts[:dry_run]
+          end
+        else
+          puts "X #{opts[:absolute] ? abspath : relpath}"
           index.delete relpath unless opts[:dry_run]
         end
-      else
-        puts "X #{opts[:absolute] ? abspath : relpath}"
-        index.delete relpath unless opts[:dry_run]
       end
     end
-
   end
 end

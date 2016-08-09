@@ -33,6 +33,8 @@ class Fixi::Command::Ls
       opt :verbose, "Include all information known about each file. By default,
         only paths will be listed.".pack
     end
+    # todo: exception if multiple args OR handle multiple args
+    # todo:less brittle way to generate JSON (and maybe don't pretty print)
     index = Fixi::Index.new(args[0])
     if opts[:json]
       print "["

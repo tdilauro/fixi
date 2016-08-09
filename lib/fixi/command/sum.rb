@@ -8,7 +8,7 @@ class Fixi::Command::Sum
   end
 
   def self.arghelp
-    "<file>"
+    "<file> ..."
   end
 
   def self.details
@@ -23,16 +23,23 @@ class Fixi::Command::Sum
         one must be specified.".pack, :short => 'l', :type => :string,
         :required => true
     end
-    unless args[0]
+
+    # the remaining arguments should be files/directories
+    paths = args
+
+    if paths.empty?
       raise "Must specify a file."
       exit 1
     end
-    path = args[0]
-    unless File.exists?(path)
-      raise "No such file: #{path}"
-      exit 1
+
+    paths.each do |path|
+      path = File.expand_path(path)
+      unless File.exists?(path)
+        raise "No such file: #{path}"
+        exit 1
+      end
+      hexdigests = Fixi::hexdigests(Fixi::digests(opts[:algorithms]), path)
+      hexdigests.each { |hexdigest| puts "#{hexdigest}" }
     end
-    hexdigests = Fixi::hexdigests(Fixi::digests(opts[:algorithms]), path)
-    hexdigests.each { |hexdigest| puts "#{hexdigest}" }
   end
 end

@@ -22,6 +22,7 @@ class Fixi::Command::Init
         a comma-separated list, which may include md5, sha1, sha256, sha384, and
         sha512.".pack, :default => "sha256", :short => 'l'
     end
+    # todo: exception if multiple args OR handle multiple args
     index = Fixi::Index.new(args[0], true, opts[:algorithms])
     puts "Initialized empty index at #{index.dotpath}"
   end
