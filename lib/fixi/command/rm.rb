@@ -24,7 +24,7 @@ class Fixi::Command::Rm
     end
 
     # default to current directory, if no paths specified
-    paths = args.empty? ? '.' : args
+    paths = args.empty? ? ['.'] : args
 
     paths.each do |path|
       path = File.expand_path(path)

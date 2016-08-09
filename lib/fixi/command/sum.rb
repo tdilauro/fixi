@@ -28,7 +28,7 @@ class Fixi::Command::Sum
     paths = args
 
     if paths.empty?
-      raise "Must specify a file."
+      raise "Must specify at least one file."
       exit 1
     end
 
