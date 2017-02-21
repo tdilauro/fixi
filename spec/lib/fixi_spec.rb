@@ -4,21 +4,22 @@ require 'tempfile'
 describe Fixi do
   describe "::command" do
     it 'should return nil for bogus name' do
-      Fixi::command("bogus").should == nil
+      expect( Fixi::command("bogus") ).to eq(nil)
     end
 
     it 'should return instance for real name' do
-      Fixi::command("init").should_not == nil
+      expect( Fixi::command("init") ).to_not eq(nil)
     end
   end
 
   describe "::digests" do
     it 'should raise error for bogus name' do
-      lambda { Fixi::digests("bogus") }.should raise_error
+      # lambda { Fixi::digests("bogus") }.should raise_error(RuntimeError)
+      expect { Fixi::digests("bogus") }.to raise_error(RuntimeError, "No such algorithm: bogus")
     end
 
     it 'should return instance for real name' do
-      Fixi::digests("md5").should_not == nil
+      expect( Fixi::digests("md5") ).to_not eq(nil)
     end
   end
 
@@ -31,13 +32,13 @@ describe Fixi do
 
     it 'should compute correct single checksum' do
       hexdigests = Fixi::hexdigests(Fixi::digests("md5"), @file.path)
-      hexdigests.should == ["acbd18db4cc2f85cedef654fccc4a4d8"]
+      expect( hexdigests ).to eq( ["acbd18db4cc2f85cedef654fccc4a4d8"] )
     end
 
     it 'should compute correct multi checksum' do
       hexdigests = Fixi::hexdigests(Fixi::digests("md5,sha1"), @file.path)
-      hexdigests.should == ["acbd18db4cc2f85cedef654fccc4a4d8",
-          "0beec7b5ea3f0fdbc95d0dd47f3c5bc275da8a33"]
+      expect( hexdigests ).to eq( ["acbd18db4cc2f85cedef654fccc4a4d8",
+          "0beec7b5ea3f0fdbc95d0dd47f3c5bc275da8a33"] )
     end
 
     after(:all) do
