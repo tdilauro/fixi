@@ -14,7 +14,6 @@ describe Fixi do
 
   describe "::digests" do
     it 'should raise error for bogus name' do
-      # lambda { Fixi::digests("bogus") }.should raise_error(RuntimeError)
       expect { Fixi::digests("bogus") }.to raise_error(RuntimeError, "No such algorithm: bogus")
     end
 
