@@ -7,7 +7,7 @@ class Fixi::Command::Ls
   end
 
   def self.arghelp
-    "[<dir>|<file>]"
+    "[<dir>|<file>] ..."
   end
 
   def self.details

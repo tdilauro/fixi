@@ -3,11 +3,11 @@ require 'fixi/index'
 
 class Fixi::Command::Info
   def self.synopsis
-    "Display a summary of the index"
+    "Display a summary of the index associated with each path"
   end
 
   def self.arghelp
-    "<dir> ..."
+    "[<dir>|<file>] ..."
   end
 
   def self.details
